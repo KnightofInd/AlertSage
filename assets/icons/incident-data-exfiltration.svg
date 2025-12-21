@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="exfil-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9B59B6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8E44AD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Folder -->\n  <path d="M 3,7 L 3,19 L 21,19 L 21,9 L 10,9 L 8,7 Z" fill="url(#exfil-grad)" opacity="0.7"/>
+  <!-- Files inside -->
+  <rect x="6" y="11" width="2" height="5" fill="#FFFFFF" opacity="0.6" rx="0.5"/>
+  <rect x="9" y="11" width="2" height="5" fill="#FFFFFF" opacity="0.6" rx="0.5"/>
+  <rect x="12" y="11" width="2" height="5" fill="#FFFFFF" opacity="0.6" rx="0.5"/>
+  <!-- Upload arrow (data leaving) -->
+  <path d="M 18,13 L 18,6 M 15,9 L 18,6 L 21,9" stroke="url(#exfil-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Animated data flow dots -->
+  <circle cx="18" cy="11" r="1" fill="url(#exfil-grad)">
+    <animate attributeName="cy" values="16;6" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

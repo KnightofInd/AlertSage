@@ -217,3 +217,4 @@ models/X_test_tfidf.joblib
 models/X_train_tfidf.joblib
 models/y_test.joblib
 models/y_train.joblib
+notebooks/models/hybrid_pipeline.joblib

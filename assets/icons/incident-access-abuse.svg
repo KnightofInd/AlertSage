@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="access-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E67E22;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D35400;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Broken lock shackle -->
+  <path d="M 8,10 L 8,7 Q 8,4 12,4 Q 16,4 16,7 L 16,9" fill="none" stroke="url(#access-grad)" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Lock body -->
+  <rect x="6" y="10" width="12" height="10" rx="2" fill="url(#access-grad)" opacity="0.9"/>
+  <!-- Keyhole -->
+  <circle cx="12" cy="14" r="1.5" fill="#FFFFFF" opacity="0.9"/>
+  <rect x="11" y="14" width="2" height="3" fill="#FFFFFF" opacity="0.9" rx="0.5"/>
+  <!-- Exclamation mark (abuse indicator) -->
+  <line x1="19" y1="5" x2="19" y2="8" stroke="#FF3B30" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="19" cy="10" r="1" fill="#FF3B30"/>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="thinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#5E5CE6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Head -->
+  <circle cx="60" cy="55" r="30" fill="url(#thinkGrad)"/>
+  <!-- Thought bubble -->
+  <circle cx="75" cy="25" r="8" fill="url(#thinkGrad)" opacity="0.7"/>
+  <circle cx="85" cy="18" r="6" fill="url(#thinkGrad)" opacity="0.5"/>
+  <circle cx="92" cy="12" r="4" fill="url(#thinkGrad)" opacity="0.3"/>
+  <!-- Face details -->
+  <circle cx="50" cy="50" r="3" fill="white"/>
+  <circle cx="70" cy="50" r="3" fill="white"/>
+  <path d="M50 65 Q60 70 70 65" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>

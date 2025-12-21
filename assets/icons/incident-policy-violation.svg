@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="policy-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFCC00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF9500;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Warning triangle -->
+  <path d="M 12,3 L 22,20 L 2,20 Z" fill="url(#policy-grad)" opacity="0.9"/>
+  <!-- Exclamation mark -->
+  <line x1="12" y1="9" x2="12" y2="14" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="12" cy="17" r="1.2" fill="#FFFFFF"/>
+</svg>
