@@ -124,6 +124,36 @@ pytest --cov=src/triage --cov-report=term-missing
 
 # Preview documentation
 mkdocs serve
+
+## Set up a local LLM (one-time)
+
+LLM features require a local GGUF model and `llama-cpp-python`:
+
+```bash
+# Create a models folder
+mkdir -p models
+
+# macOS (Metal GPU):
+CMAKE_ARGS="-DLLAMA_METAL=on" pip install llama-cpp-python
+
+# Download a model (choose one)
+huggingface-cli download TheBloke/Llama-3.1-8B-Instruct-GGUF \
+	Llama-3.1-8B-Instruct-Q6_K.gguf --local-dir models
+
+# Or smaller alternatives:
+huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF \
+	mistral-7b-instruct-v0.2.Q6_K.gguf --local-dir models
+huggingface-cli download TinyLlama/TinyLlama-1.1B-Chat-v1.0-GGUF \
+	TinyLlama-1.1B-Chat-v1.0.Q6_K.gguf --local-dir models
+
+# Point the app to your model
+export TRIAGE_LLM_MODEL="$(pwd)/models/Llama-3.1-8B-Instruct-Q6_K.gguf"
+
+# Test second opinion
+nlp-triage --llm-second-opinion "Suspicious activity detected"
+```
+
+Tip: Some models require Hugging Face login and license acceptance.
 ```
 
 ## Documentation
@@ -137,11 +167,11 @@ mkdocs serve
 
 - **Issues**: [GitHub Issues](https://github.com/texasbe2trill/AlertSage/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/texasbe2trill/AlertSage/discussions)
-- **Contributing**: [CONTRIBUTING.md](../CONTRIBUTING.md)
+- **Contributing**: [Contributing](contributing.md)
 
 ## What's Next?
 
-1. ✅ Read the [full README](../README.md)
+1. ✅ Read the [Overview](index.md)
 2. ✅ Try different CLI options and thresholds
 3. ✅ Explore the Streamlit UI features
 4. ✅ Walk through the Jupyter notebooks

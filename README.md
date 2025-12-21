@@ -189,6 +189,53 @@ nlp-triage --llm-second-opinion \
 
 # High-difficulty mode for ambiguous cases
 nlp-triage --difficulty soc-hard "Website experiencing slowdowns"
+
+### LLM Model Setup (required for LLM features)
+
+LLM-assisted features use local llama.cpp models in GGUF format. Download a model and point the app to it:
+
+```bash
+# 1) Create a models directory
+mkdir -p models
+
+# 2) Install llama-cpp-python with GPU acceleration (macOS Metal)
+CMAKE_ARGS="-DLLAMA_METAL=on" pip install llama-cpp-python
+
+# Alternative: CPU-only
+# pip install llama-cpp-python
+
+# 3) Download a GGUF model via Hugging Face (choose ONE)
+
+# Option A: Llama 3.1 8B Instruct (quality, larger)
+huggingface-cli download TheBloke/Llama-3.1-8B-Instruct-GGUF \
+  Llama-3.1-8B-Instruct-Q6_K.gguf --local-dir models
+
+# Option B: Mistral 7B Instruct v0.2 (solid, mid-size)
+huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF \
+  mistral-7b-instruct-v0.2.Q6_K.gguf --local-dir models
+
+# Option C: TinyLlama 1.1B Chat (very small, CPU-friendly)
+huggingface-cli download TinyLlama/TinyLlama-1.1B-Chat-v1.0-GGUF \
+  TinyLlama-1.1B-Chat-v1.0.Q6_K.gguf --local-dir models
+
+# 4) Point AlertSage at your model path
+export TRIAGE_LLM_MODEL="$(pwd)/models/Llama-3.1-8B-Instruct-Q6_K.gguf"  # or whichever you downloaded
+
+# 5) Test CLI LLM second opinion
+nlp-triage --llm-second-opinion "Server began encrypting shared folders."
+
+# Optional: Streamlit UI with LLM enabled (toggle in sidebar)
+streamlit run ui_premium.py
+
+# Debug/disable GPU
+export TRIAGE_LLM_DEBUG=1
+export LLAMA_N_GPU_LAYERS=0   # force CPU if needed
+```
+
+Notes:
+- The default fallback path is models/Meta-Llama-3.1-8B-Instruct-Q6_K.gguf; using `TRIAGE_LLM_MODEL` is preferred.
+- Some models (e.g., Llama 3.x) require license acceptance on Hugging Face; authenticate before download.
+- GPU backends are auto-enabled (Metal/CUDA) when available; see docs for tuning.
 ```
 
 ### 5) Docs

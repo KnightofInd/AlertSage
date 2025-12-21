@@ -24,18 +24,34 @@ pip install llama-cpp-python
 
 ### Download Model
 
-Recommended: Llama-2-7B-Chat (Q5_K_S quantization)
+Choose a GGUF model and download via Hugging Face CLI (authenticate if required):
 
 ```bash
-wget https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q5_K_S.gguf \
-  -P models/
+# Create models directory
+mkdir -p models
+
+# Option A: Llama 3.1 8B Instruct (higher quality)
+huggingface-cli download TheBloke/Llama-3.1-8B-Instruct-GGUF \
+  Llama-3.1-8B-Instruct-Q6_K.gguf --local-dir models
+
+# Option B: Mistral 7B Instruct v0.2 (mid-size)
+huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF \
+  mistral-7b-instruct-v0.2.Q6_K.gguf --local-dir models
+
+# Option C: TinyLlama 1.1B Chat (small, CPU-friendly)
+huggingface-cli download TinyLlama/TinyLlama-1.1B-Chat-v1.0-GGUF \
+  TinyLlama-1.1B-Chat-v1.0.Q6_K.gguf --local-dir models
 ```
 
 ### Configure Environment
 
 ```bash
-export TRIAGE_LLM_MODEL=$(pwd)/models/llama-2-7b-chat.Q5_K_S.gguf
+# Preferred (CLI):
+export TRIAGE_LLM_MODEL="$(pwd)/models/Llama-3.1-8B-Instruct-Q6_K.gguf"
 export TRIAGE_LLM_DEBUG=1
+
+# Alternative (library client compatibility):
+export NLP_TRIAGE_LLM_BACKEND="$TRIAGE_LLM_MODEL"
 ```
 
 ## Dataset Generation
