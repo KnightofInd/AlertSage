@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="classify-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Tag shape -->
+  <path d="M 3,3 L 13,3 L 21,12 L 13,21 L 3,21 L 3,3 Z" fill="url(#classify-grad)" opacity="0.9"/>
+  <!-- Hole for tag -->
+  <circle cx="7" cy="7" r="1.8" fill="#FFFFFF"/>
+  <!-- Lines on tag -->
+  <line x1="10" y1="10" x2="14" y2="14" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+  <line x1="10" y1="13" x2="12" y2="15" stroke="#FFFFFF" stroke-width="1.5" opacity="0.7"/>
+</svg>
