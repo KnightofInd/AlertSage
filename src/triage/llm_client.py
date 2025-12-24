@@ -18,6 +18,13 @@ LLM_DEBUG = os.getenv("NLP_TRIAGE_LLM_DEBUG", "0").strip() not in {
     "False",
 }
 
+HF_DEFAULT_MODEL = (
+    os.getenv("TRIAGE_HF_MODEL")
+    or os.getenv("HF_MODEL")
+    or "meta-llama/Meta-Llama-3.1-8B-Instruct"
+)
+HF_TOKEN_ENV = os.getenv("TRIAGE_HF_TOKEN") or os.getenv("HF_TOKEN") or ""
+
 
 try:  # pragma: no cover - import is environment dependent
     from llama_cpp import Llama  # type: ignore
@@ -29,6 +36,47 @@ def _debug(msg: str) -> None:
     """Lightweight debug logger for LLM operations."""
     if LLM_DEBUG:
         print(f"[LLM CLIENT] {msg}", flush=True)
+
+
+def _get_streamlit_secrets() -> tuple[str, str]:
+    """Safely read HF credentials from Streamlit secrets when available."""
+    try:
+        import streamlit as st  # type: ignore
+
+        secrets = getattr(st, "secrets", None)
+        if secrets:
+            token = str(secrets.get("HF_TOKEN", "")).strip()
+            model = str(secrets.get("HF_MODEL", "")).strip()
+            return model, token
+    except Exception:
+        pass
+    return "", ""
+
+
+def resolve_hf_credentials(
+    model: Optional[str] = None,
+    token: Optional[str] = None,
+) -> tuple[str, str, bool]:
+    """Resolve Hugging Face model/token from secrets → env → arguments.
+
+    Returns (model, token, token_available).
+    """
+
+    secrets_model, secrets_token = _get_streamlit_secrets()
+
+    resolved_token = (token or secrets_token or HF_TOKEN_ENV).strip()
+    resolved_model = (model or secrets_model or HF_DEFAULT_MODEL).strip()
+
+    if not resolved_model:
+        resolved_model = HF_DEFAULT_MODEL
+
+    # Hugging Face Inference expects a repo id, not a local GGUF path
+    if resolved_model.lower().endswith(".gguf"):
+        _debug(
+            "HF model appears to be a GGUF filename; use a repo id like 'meta-llama/Meta-Llama-3.1-8B-Instruct'."
+        )
+
+    return resolved_model, resolved_token, bool(resolved_token)
 
 
 @dataclass
@@ -334,4 +382,5 @@ __all__ = [
     "LocalLLMClient",
     "HuggingFaceInferenceClient",
     "RateLimiter",
+    "resolve_hf_credentials",
 ]

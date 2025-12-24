@@ -198,6 +198,8 @@ Prefer not to download a GGUF model? Use Hugging Face Inference instead:
 
 For deployment, the Streamlit demo uses hosted Hugging Face inference, while local GGUF/llama.cpp is supported via `pip install -e ".[dev]"`.
 
+**LLM Assist Demo:** the public Streamlit demo will auto-use Hugging Face hosted inference when `HF_TOKEN` (and optional `HF_MODEL`) No local llama.cpp install is required for demo users.
+
 1. Export `HF_TOKEN` (or `TRIAGE_HF_TOKEN`) with your personal token.
 2. Optional: set `TRIAGE_HF_MODEL`/`HF_MODEL` (default `mistralai/Mistral-7B-Instruct-v0.3`).
 3. The CLI automatically routes LLM second-opinion calls to Hugging Face when a token is present—no local model required.

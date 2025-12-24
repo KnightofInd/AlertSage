@@ -16,8 +16,16 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 from collections import Counter
-from typing import Any, Tuple
+from typing import Any, Tuple, TYPE_CHECKING
 import joblib
+
+if TYPE_CHECKING:
+    import tomli as tomllib  # noqa: F401 #type: ignore[import-not-found]
+
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:  # pragma: no cover - fallback for older runtimes
+    import tomli as tomllib  # type: ignore[import-not-found]
 
 # Import custom modules
 from src.triage.database import TriageDatabase
@@ -134,14 +142,55 @@ HF_UI_WINDOW_SECONDS = 60
 # Dark mode disabled for readability; keep light as single, consistent theme
 THEME_OPTIONS = ["Light"]
 
+_SECRETS_PATHS = [
+    Path("~/.streamlit/secrets.toml").expanduser(),
+    Path.cwd() / ".streamlit" / "secrets.toml",
+]
+
+_CACHED_SECRETS: dict[str, Any] | None = None
+
+
+def _load_local_secrets() -> dict[str, Any]:
+    """Load secrets from the first existing secrets.toml without using st.secrets."""
+    global _CACHED_SECRETS
+    if _CACHED_SECRETS is not None:
+        return _CACHED_SECRETS
+
+    for path in _SECRETS_PATHS:
+        try:
+            if path.exists():
+                _CACHED_SECRETS = tomllib.loads(path.read_text())
+                return _CACHED_SECRETS
+        except Exception:
+            # If parsing fails, return empty to avoid noisy warnings
+            _CACHED_SECRETS = {}
+            return _CACHED_SECRETS
+
+    _CACHED_SECRETS = {}
+    return _CACHED_SECRETS
+
+
+def get_secret_value(key: str, default: str = "") -> str:
+    """Read a secret from local secrets.toml if present, otherwise return default."""
+    secrets_data = _load_local_secrets()
+    return str(secrets_data.get(key, default)).strip()
+
 
 def get_llm_settings() -> tuple[str, str, str | None]:
     """Fetch LLM provider settings from session state with safe defaults."""
-    provider = st.session_state.get("llm_provider", "local")
+    secrets_token = get_secret_value("HF_TOKEN", "")
+    secrets_model = get_secret_value("HF_MODEL", "")
+
+    env_token = os.environ.get("TRIAGE_HF_TOKEN") or os.environ.get("HF_TOKEN") or ""
+    env_model = os.environ.get("TRIAGE_HF_MODEL") or os.environ.get("HF_MODEL") or ""
+
+    default_provider = "huggingface" if (secrets_token or env_token) else "local"
+    provider = st.session_state.get("llm_provider", default_provider)
     hf_model = st.session_state.get(
-        "hf_model_id", "mistralai/Mixtral-8x7B-Instruct-v0.1"
+        "hf_model_id",
+        secrets_model or env_model or "mistralai/Mixtral-8x7B-Instruct-v0.1",
     )
-    hf_token = st.session_state.get("selected_hf_token")
+    hf_token = st.session_state.get("selected_hf_token") or secrets_token or env_token
     return provider, hf_model, hf_token
 
 
@@ -2473,7 +2522,16 @@ def create_sidebar():
         "Local (GGUF)": "local",
         "Hugging Face Inference": "huggingface",
     }
-    default_provider_idx = 1 if os.environ.get("HF_TOKEN") or os.environ.get("TRIAGE_HF_TOKEN") else 0
+    hf_secret_token = get_secret_value("HF_TOKEN", "")
+    hf_secret_model = get_secret_value("HF_MODEL", "")
+
+    default_provider_idx = (
+        1
+        if hf_secret_token
+        or os.environ.get("HF_TOKEN")
+        or os.environ.get("TRIAGE_HF_TOKEN")
+        else 0
+    )
     provider_label = st.sidebar.selectbox(
         "LLM Provider",
         list(provider_options.keys()),
@@ -2485,7 +2543,8 @@ def create_sidebar():
     huggingface_enabled = use_llm and llm_provider == "huggingface"
 
     default_hf_model = (
-        os.environ.get("TRIAGE_HF_MODEL")
+        hf_secret_model
+        or os.environ.get("TRIAGE_HF_MODEL")
         or os.environ.get("HF_MODEL")
         or "mistralai/Mistral-7B-Instruct-v0.3"
     )
@@ -2517,11 +2576,21 @@ def create_sidebar():
     elif huggingface_enabled and hf_env_token:
         st.sidebar.caption("Hugging Face token detected in environment.")
 
-    selected_hf_token = (hf_token_input or hf_env_token).strip()
+    selected_hf_token = (hf_token_input or hf_env_token or hf_secret_token).strip()
     if huggingface_enabled:
         st.sidebar.caption(
             f"UI rate limit: {HF_UI_MAX_REQUESTS} requests/{HF_UI_WINDOW_SECONDS}s per session."
         )
+
+    if selected_hf_token:
+        st.sidebar.caption("LLM Assist: Hugging Face (hosted)")
+    else:
+        st.sidebar.caption("LLM Assist: Local llama.cpp")
+
+    # Persist LLM selections for use across tabs and defaults
+    st.session_state.llm_provider = llm_provider
+    st.session_state.hf_model_id = hf_model_id
+    st.session_state.selected_hf_token = selected_hf_token
 
     enable_viz = st.sidebar.checkbox(
         "Advanced Visualizations",

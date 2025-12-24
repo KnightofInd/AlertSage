@@ -61,6 +61,7 @@ from src.triage.embeddings import get_embedder  # type: ignore
 from src.triage.llm_client import (  # type: ignore
     HuggingFaceInferenceClient,
     RateLimiter,
+    resolve_hf_credentials,
 )
 
 # -----------------------------------------------------------------------------
@@ -139,22 +140,22 @@ def _llm_debug(msg: str) -> None:
         print(f"[LLM DEBUG] {msg}", file=sys.stderr, flush=True)
 
 
-def _resolve_llm_provider(provider: str | None) -> str:
+def _resolve_llm_provider(provider: str | None, hf_available: bool) -> str:
     env_choice = (os.environ.get("TRIAGE_LLM_PROVIDER") or "").lower()
-    selected = (provider or env_choice).lower()
+    requested = (provider or env_choice).lower()
 
-    if not selected and HF_TOKEN_ENV:
-        selected = "huggingface"
+    if requested in {"local", "gguf", "llama", "llama.cpp"}:
+        return "local"
 
-    if selected in {"hf", "huggingface", "hugging_face", "huggingface_inference"}:
+    if hf_available:
         return "huggingface"
+
     return "local"
 
 
-def _resolve_hf_settings(model: str | None, token: str | None) -> tuple[str, str]:
-    resolved_model = model or HF_DEFAULT_MODEL
-    resolved_token = token or HF_TOKEN_ENV
-    return resolved_model, resolved_token
+def _resolve_hf_settings(model: str | None, token: str | None) -> tuple[str, str, bool]:
+    resolved_model, resolved_token, has_token = resolve_hf_credentials(model, token)
+    return resolved_model, resolved_token, has_token
 
 
 def _get_hf_client(model: str, token: str, max_tokens: int):
@@ -397,7 +398,12 @@ def llm_second_opinion(
     if not skip_preprocessing:
         skip_preprocessing = os.environ.get("TRIAGE_LLM_RAW_TEXT", "0") == "1"
 
-    provider_choice = _resolve_llm_provider(provider)
+    # Resolve HF credentials (Streamlit secrets → env → provided args)
+    hf_model_resolved, hf_token_resolved, hf_available = _resolve_hf_settings(
+        hf_model, hf_token
+    )
+
+    provider_choice = _resolve_llm_provider(provider, hf_available)
     max_gen_tokens = max_tokens if max_tokens is not None else LLM_MAX_TOKENS
 
     # Optionally preprocess the text for LLM (default behavior for CLI consistency)
@@ -460,10 +466,11 @@ Do not repeat these instructions.
     data: dict | None = None
 
     if provider_choice == "huggingface":
-        model, token = _resolve_hf_settings(hf_model, hf_token)
-        if token:
+        if hf_token_resolved:
             try:
-                hf_client = _get_hf_client(model, token, max_gen_tokens)
+                hf_client = _get_hf_client(
+                    hf_model_resolved, hf_token_resolved, max_gen_tokens
+                )
                 data = hf_client.generate_json(prompt, max_tokens=max_gen_tokens)
                 _llm_debug("HF inference completed successfully.")
             except Exception as exc:  # pragma: no cover - network dependent
@@ -484,8 +491,8 @@ Do not repeat these instructions.
                 "label": "uncertain",
                 "mitre_ids": [],
                 "rationale": (
-                    "LLM assist is not configured (llama-cpp-python not installed "
-                    "or model path not set)."
+                    "LLM assist is not configured. For the public demo, set HF_TOKEN (and optional HF_MODEL) in Streamlit secrets. "
+                    "For local usage, install llama-cpp-python and set a GGUF model path."
                 ),
             }
 
