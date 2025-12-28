@@ -1169,8 +1169,8 @@ def load_artifacts():
     """
     import sys
     # Get the current model module (handles module reloading in tests)
-    # Try both import paths: installed package (triage) and development (src.triage)
-    model_module = sys.modules.get("triage.model") or sys.modules.get("src.triage.model")
+    # Check src.triage.model first (used by tests), then triage.model (installed package)
+    model_module = sys.modules.get("src.triage.model") or sys.modules.get("triage.model")
     if model_module is None:
         try:
             from triage import model as model_module
