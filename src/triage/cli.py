@@ -1167,9 +1167,17 @@ def load_artifacts():
     Uses cached loader from model.py to prevent repeated disk I/O.
     Models are loaded once and cached in memory for the process lifetime.
     """
-    from src.triage.model import load_vectorizer_and_model
+    import sys
+    # Get the current model module (handles module reloading in tests)
+    # Try both import paths: installed package (triage) and development (src.triage)
+    model_module = sys.modules.get("triage.model") or sys.modules.get("src.triage.model")
+    if model_module is None:
+        try:
+            from triage import model as model_module
+        except ImportError:
+            from src.triage import model as model_module
     
-    vectorizer, clf = load_vectorizer_and_model()
+    vectorizer, clf = model_module.load_vectorizer_and_model()
     embedder = get_embedder()
     classes = clf.classes_
     return vectorizer, clf, embedder, classes
