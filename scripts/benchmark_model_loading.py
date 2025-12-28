@@ -57,8 +57,8 @@ def benchmark_direct_loading():
     times = []
     for i in range(5):
         start = time.perf_counter()
-        vectorizer = joblib.load(vectorizer_path)
-        clf = joblib.load(model_path)
+        _ = joblib.load(vectorizer_path)
+        _ = joblib.load(model_path)
         end = time.perf_counter()
         load_time = (end - start) * 1000  # Convert to milliseconds
         times.append(load_time)
@@ -116,7 +116,7 @@ def benchmark_cached_loading():
     # Subsequent calls (cache hits - should be nearly instant)
     for i in range(10):
         start = time.perf_counter()
-        vectorizer2, clf2 = load_vectorizer_and_model()
+        _, _ = load_vectorizer_and_model()
         end = time.perf_counter()
         cached_time = (end - start) * 1000
         times.append(cached_time)
